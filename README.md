@@ -1,64 +1,65 @@
 # Cancer Risk Prediction
 
-Ứng dụng **Streamlit** dự đoán mức độ rủi ro ung thư (`High` / `Medium` / `Low`) từ
-17 yếu tố nguy cơ, sử dụng model **XGBoost** đã huấn luyện sẵn.
+A **Streamlit** app that predicts cancer risk level (`High` / `Medium` / `Low`) from
+17 risk factors, using a pre-trained **XGBoost** model.
 
-## Cấu trúc thư mục
+## Project structure
 
 ```
 Cancer-Risk-Prediction/
-├── app.py                      # Ứng dụng Streamlit
-├── xgb_complete_pipeline.pkl   # Model + label encoder (đã huấn luyện)
-├── cancer-risk-factors.csv     # Dữ liệu gốc
-├── Cancer_EDA.ipynb            # Notebook phân tích dữ liệu
-├── Cancer_ML (1).ipynb         # Notebook huấn luyện model
+├── app.py                      # Streamlit app
+├── xgb_complete_pipeline.pkl   # Model + label encoder (pre-trained)
+├── cancer-risk-factors.csv     # Raw dataset
+├── Cancer_EDA.ipynb            # Data analysis notebook
+├── Cancer_ML (1).ipynb         # Model training notebook
 ├── requirements.txt
-├── .env / .env.example         # Biến môi trường (MODEL_PATH, STREAMLIT_PORT)
+├── .env / .env.example         # Environment variables (MODEL_PATH, STREAMLIT_PORT)
 ├── .gitignore
 └── README.md
 ```
 
-## Cách chạy
+## How to run
 
 ```bash
-# 1. Tạo môi trường ảo
+# 1. Create a virtual environment
 python -m venv .venv
 # Windows
 .venv\Scripts\activate
 # Linux/macOS
 source .venv/bin/activate
 
-# 2. Cài đặt thư viện
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Chạy ứng dụng
+# 3. Run the app
 streamlit run app.py
 ```
 
-Mặc định ứng dụng mở tại `http://localhost:8501` (cấu hình qua `STREAMLIT_PORT`).
+The app opens at `http://localhost:8501` by default (configurable via `STREAMLIT_PORT`).
 
-## Cấu hình
+## Configuration
 
-Sao chép `.env.example` thành `.env` và chỉnh nếu cần:
+Copy `.env.example` to `.env` and adjust if needed:
 
 ```
 MODEL_PATH=xgb_complete_pipeline.pkl
 STREAMLIT_PORT=8501
 ```
 
-## Lưu ý kỹ thuật
+## Technical notes
 
-- **Scaler chưa được fit:** file `.pkl` chứa `StandardScaler` nhưng **chưa fit**, vì vậy
-  ứng dụng **không sử dụng** scaler này. Model nhận trực tiếp DataFrame 17 cột thô đúng
-  thứ tự.
-- Thứ tự 17 features: `Age, Gender, Smoking, Alcohol_Use, Obesity, Family_History,
+- **Scaler is not fitted:** the `.pkl` file contains a `StandardScaler` that is **not
+  fitted**, so the app **does not use** it. The model receives the raw 17-column DataFrame
+  directly in the correct order.
+- Feature order (17): `Age, Gender, Smoking, Alcohol_Use, Obesity, Family_History,
   Diet_Red_Meat, Diet_Salted_Processed, Fruit_Veg_Intake, Physical_Activity,
   Air_Pollution, Occupational_Hazards, BRCA_Mutation, H_Pylori_Infection,
   Calcium_Intake, BMI, Physical_Activity_Level`.
-- Hiệu năng tham khảo: macro-F1 ≈ 0.73, accuracy ≈ 0.88. Lớp `High` là lớp hiếm (~5.1%)
-  nên dễ bị bỏ sót.
+- Reference performance: macro-F1 ≈ 0.73, accuracy ≈ 0.88. `High` is a rare class (~5.1%)
+  and is therefore easy to miss.
 
-## ⚠️ Disclaimer y tế
+## ⚠️ Medical disclaimer
 
-Ứng dụng chỉ dùng cho mục đích học tập và tham khảo. Kết quả **không thay thế chẩn đoán
-hoặc tư vấn y khoa chuyên nghiệp**. Vui lòng liên hệ cơ sở y tế để được đánh giá chính xác.
+This app is for educational and reference purposes only. The results **do not replace
+professional diagnosis or medical advice**. Please consult a healthcare provider for an
+accurate assessment.

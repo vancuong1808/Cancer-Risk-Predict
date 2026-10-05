@@ -1,8 +1,3 @@
-"""Ứng dụng Streamlit dự đoán mức độ rủi ro ung thư.
-
-Chạy: streamlit run app.py
-"""
-
 import os
 
 import joblib
@@ -14,7 +9,7 @@ load_dotenv()
 
 MODEL_PATH = os.getenv("MODEL_PATH", "xgb_complete_pipeline.pkl")
 
-# Đúng thứ tự 17 features mà model đã được huấn luyện.
+# Exact order of the 17 features the model was trained on.
 FEATURES = [
     "Age",
     "Gender",
@@ -35,89 +30,73 @@ FEATURES = [
     "Physical_Activity_Level",
 ]
 
-st.set_page_config(page_title="Dự đoán rủi ro ung thư", page_icon="🩺", layout="wide")
+st.set_page_config(page_title="Cancer Risk Prediction", page_icon="🩺", layout="wide")
 
 
 @st.cache_resource(show_spinner=False)
 def load_model(path):
-    """Load pipeline (dict) qua joblib. Không dùng scaler vì chưa được fit."""
+    """Load the pipeline (dict) via joblib. Scaler is not used because it is unfitted."""
     return joblib.load(path)
 
 
 def main():
-    st.title("🩺 Dự đoán mức độ rủi ro ung thư")
+    st.title("🩺 Cancer Risk Prediction")
     st.caption(
-        "Nhập các yếu tố nguy cơ ở thanh bên trái, sau đó bấm **Dự đoán** để xem kết quả."
+        "Enter the risk factors in the left sidebar, then click **Predict** to see the result."
     )
 
-    # ---------------- Sidebar: nhập liệu ----------------
-    st.sidebar.header("Thông tin bệnh nhân")
+    # ---------------- Sidebar: inputs ----------------
+    st.sidebar.header("Patient information")
 
-    age = st.sidebar.slider("Tuổi (Age)", 25, 90, 55, step=1)
+    age = st.sidebar.slider("Age", 25, 90, 55, step=1)
 
-    gender_label = st.sidebar.selectbox("Giới tính (Gender)", ["Nam", "Nữ"], index=0)
-    gender = 1 if gender_label == "Nam" else 0
+    gender_label = (1 if st.sidebar.selectbox("Gender", ["Female", "Male"], index=0) == "Male" else 0)
 
-    st.sidebar.subheader("Yếu tố lối sống / môi trường (0–10)")
-    smoking = st.sidebar.slider("Hút thuốc (Smoking)", 0, 10, 3)
-    alcohol = st.sidebar.slider("Sử dụng rượu bia (Alcohol_Use)", 0, 10, 3)
-    obesity = st.sidebar.slider("Béo phì (Obesity)", 0, 10, 4)
-    red_meat = st.sidebar.slider("Ăn thịt đỏ (Diet_Red_Meat)", 0, 10, 4)
-    salted = st.sidebar.slider(
-        "Ăn đồ muối/chế biến sẵn (Diet_Salted_Processed)", 0, 10, 4
-    )
-    fruit_veg = st.sidebar.slider(
-        "Ăn rau quả (Fruit_Veg_Intake)", 0, 10, 5
-    )
-    physical_activity = st.sidebar.slider(
-        "Vận động thể chất (Physical_Activity)", 0, 10, 5
-    )
-    air_pollution = st.sidebar.slider(
-        "Ô nhiễm không khí (Air_Pollution)", 0, 10, 5
-    )
-    occupational = st.sidebar.slider(
-        "Nguy cơ nghề nghiệp (Occupational_Hazards)", 0, 10, 4
-    )
-    calcium = st.sidebar.slider("Canxi (Calcium_Intake)", 0, 10, 4)
-    activity_level = st.sidebar.slider(
-        "Mức độ vận động (Physical_Activity_Level)", 0, 10, 5
-    )
+    st.sidebar.subheader("Lifestyle / environmental factors (0–10)")
+    smoking = st.sidebar.slider("Smoking", 0, 10, 3)
+    alcohol = st.sidebar.slider("Alcohol Use", 0, 10, 3)
+    obesity = st.sidebar.slider("Obesity", 0, 10, 4)
+    red_meat = st.sidebar.slider("Diet: Red Meat", 0, 10, 4)
+    salted = st.sidebar.slider("Diet: Salted / Processed Food", 0, 10, 4)
+    fruit_veg = st.sidebar.slider("Fruit & Vegetable Intake", 0, 10, 5)
+    physical_activity = st.sidebar.slider("Physical Activity", 0, 10, 5)
+    air_pollution = st.sidebar.slider("Air Pollution", 0, 10, 5)
+    occupational = st.sidebar.slider("Occupational Hazards", 0, 10, 4)
+    calcium = st.sidebar.slider("Calcium Intake", 0, 10, 4)
+    activity_level = st.sidebar.slider("Physical Activity Level", 0, 10, 5)
 
-    st.sidebar.subheader("Tiền sử / yếu tố di truyền")
+    st.sidebar.subheader("Medical history / genetic factors")
     family_history = (
         1
-        if st.sidebar.selectbox("Tiền sử gia đình (Family_History)", ["Không", "Có"], index=0)
-        == "Có"
+        if st.sidebar.selectbox("Family History", ["No", "Yes"], index=0)
+        == "Yes"
         else 0
     )
     brca = (
         1
-        if st.sidebar.selectbox("Đột biến BRCA (BRCA_Mutation)", ["Không", "Có"], index=0)
-        == "Có"
+        if st.sidebar.selectbox("BRCA Mutation", ["No", "Yes"], index=0)
+        == "Yes"
         else 0
     )
     h_pylori = (
         1
-        if st.sidebar.selectbox(
-            "Nhiễm H. Pylori (H_Pylori_Infection)", ["Không", "Có"], index=0
-        )
-        == "Có"
+        if st.sidebar.selectbox("H. Pylori Infection", ["No", "Yes"], index=0)
+        == "Yes"
         else 0
     )
 
     bmi = st.sidebar.number_input(
-        "Chỉ số BMI", min_value=15.0, max_value=41.4, value=26.5, step=0.1, format="%.1f"
+        "BMI", min_value=15.0, max_value=41.4, value=26.5, step=0.1, format="%.1f"
     )
 
-    predict_clicked = st.sidebar.button("Dự đoán", type="primary")
+    predict_clicked = st.sidebar.button("Predict", type="primary")
 
-    # ---------------- Nội dung chính ----------------
     if predict_clicked:
         if not os.path.exists(MODEL_PATH):
             st.error(
-                f"Không tìm thấy file model tại `{MODEL_PATH}`.\n\n"
-                "Hãy kiểm tra biến `MODEL_PATH` trong file `.env`, hoặc đảm bảo file "
-                "`xgb_complete_pipeline.pkl` nằm cùng thư mục với `app.py`."
+                f"Model file not found at `{MODEL_PATH}`.\n\n"
+                "Please check the `MODEL_PATH` variable in your `.env` file, or make sure "
+                "`xgb_complete_pipeline.pkl` is located in the same folder as `app.py`."
             )
             return
 
@@ -125,13 +104,13 @@ def main():
             pipeline = load_model(MODEL_PATH)
             model = pipeline["model"]
             label_encoder = pipeline["label_encoder"]
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"Không thể tải model: {exc}")
+        except Exception as exc:
+            st.error(f"Failed to load the model: {exc}")
             return
 
         row = {
             "Age": age,
-            "Gender": gender,
+            "Gender": gender_label,
             "Smoking": smoking,
             "Alcohol_Use": alcohol,
             "Obesity": obesity,
@@ -155,51 +134,50 @@ def main():
             pred_label = label_encoder.inverse_transform(pred)[0]
             proba = model.predict_proba(X)[0]
             classes = list(label_encoder.classes_)  # ['High', 'Low', 'Medium']
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"Lỗi khi dự đoán: {exc}")
+        except Exception as exc:
+            st.error(f"Prediction error: {exc}")
             return
 
-        label_vi = {"High": "Cao", "Medium": "Trung bình", "Low": "Thấp"}
         color = {"High": "🔴", "Medium": "🟠", "Low": "🟢"}
-        pred_vi = label_vi.get(pred_label, pred_label)
 
-        st.subheader("Kết quả dự đoán")
+        st.subheader("Prediction result")
         col1, col2 = st.columns([1, 2])
         with col1:
-            st.metric("Mức độ rủi ro", f"{color.get(pred_label, '')} {pred_vi}")
+            st.metric("Risk level", f"{color.get(pred_label, '')} {pred_label}")
         with col2:
             proba_df = pd.DataFrame(
                 {
-                    "Mức độ": [label_vi.get(c, c) for c in classes],
-                    "Xác suất": [float(p) for p in proba],
+                    "Risk level": list(classes),
+                    "Probability": [float(p) for p in proba],
                 }
             )
-            st.bar_chart(proba_df.set_index("Mức độ"))
+            st.bar_chart(proba_df.set_index("Risk level"))
 
-        st.write("**Xác suất từng mức độ:**")
+        st.write("**Probability for each risk level:**")
         cols = st.columns(len(classes))
         for i, c in enumerate(classes):
-            cols[i].metric(label_vi.get(c, c), f"{proba[i] * 100:.1f}%")
+            cols[i].metric(c, f"{proba[i] * 100:.1f}%")
 
         st.warning(
-            "⚠️ **Cảnh báo y tế:** Kết quả này chỉ mang tính tham khảo và **không thay thế "
-            "chẩn đoán hoặc tư vấn của bác sĩ**. Hãy liên hệ cơ sở y tế để được đánh giá "
-            "chính xác."
+            "⚠️ **Medical disclaimer:** This result is for reference only and **does not "
+            "replace a professional diagnosis or medical advice**. Please consult a "
+            "healthcare provider for an accurate assessment."
         )
 
     else:
-        st.info("👈 Nhập thông tin ở thanh bên trái và bấm **Dự đoán**.")
+        st.info("👈 Enter the information in the left sidebar and click **Predict**.")
 
-    # ---------------- Thông tin model ----------------
-    with st.expander("ℹ️ Thông tin model"):
+    # ---------------- Model information ----------------
+    with st.expander("ℹ️ Model information"):
         st.markdown(
             """
-- **Thuật toán:** XGBoost (multi:softmax), 3 lớp: `High`, `Low`, `Medium`.
-- **Hiệu năng (theo notebook huấn luyện):** macro-F1 ≈ **0.73**, accuracy ≈ **0.88**.
-- **Lưu ý về lớp hiếm:** lớp `High` chỉ chiếm khoảng **5.1%** dữ liệu, nên khả năng
-  nhận diện lớp này thấp hơn hai lớp còn lại.
-- **Scaler:** pipeline có kèm `StandardScaler` **nhưng chưa được fit**, do đó ứng dụng
-  **không sử dụng scaler**. Model nhận trực tiếp DataFrame 17 cột thô đúng thứ tự.
+- **Algorithm:** XGBoost (multi:softmax), 3 classes: `High`, `Low`, `Medium`.
+- **Performance (from the training notebook):** macro-F1 ≈ **0.73**, accuracy ≈ **0.88**.
+- **Rare class note:** the `High` class accounts for only about **5.1%** of the data, so
+  it is harder to detect than the other two classes.
+- **Scaler:** the pipeline includes a `StandardScaler` that is **not fitted**, so the app
+  **does not use the scaler**. The model receives the raw 17-column DataFrame directly in
+  the correct order.
 """
         )
 
