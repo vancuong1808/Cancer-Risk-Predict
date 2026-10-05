@@ -1,0 +1,13 @@
+# Môi trường
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.log
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
