@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MODEL_PATH = os.getenv("MODEL_PATH", "xgb_complete_pipeline.pkl")
+MODEL_PATH = os.getenv("MODEL_PATH", "models/xgb_complete_pipeline.pkl")
 
 # Exact order of the 17 features the model was trained on.
 FEATURES = [
@@ -96,7 +96,7 @@ def main():
             st.error(
                 f"Model file not found at `{MODEL_PATH}`.\n\n"
                 "Please check the `MODEL_PATH` variable in your `.env` file, or make sure "
-                "`xgb_complete_pipeline.pkl` is located in the same folder as `app.py`."
+                "`xgb_complete_pipeline.pkl` is located in the `models/` folder."
             )
             return
 

@@ -7,12 +7,17 @@ A **Streamlit** app that predicts cancer risk level (`High` / `Medium` / `Low`) 
 
 ```
 Cancer-Risk-Prediction/
-├── app.py                      # Streamlit app
-├── xgb_complete_pipeline.pkl   # Model + label encoder (pre-trained)
-├── cancer-risk-factors.csv     # Raw dataset
-├── Cancer_EDA.ipynb            # Data analysis notebook
-├── Cancer_ML (1).ipynb         # Model training notebook
+├── app/
+│   └── app.py                  # Streamlit app
+├── data/
+│   └── cancer-risk-factors.csv # Raw dataset
+├── models/
+│   └── xgb_complete_pipeline.pkl  # Model + label encoder (pre-trained)
+├── notebooks/
+│   ├── Cancer_EDA.ipynb        # Data analysis notebook
+│   └── Cancer_ML (1).ipynb     # Model training notebook
 ├── requirements.txt
+├── run.bat / run.ps1           # Convenience launcher scripts
 ├── .env / .env.example         # Environment variables (MODEL_PATH, STREAMLIT_PORT)
 ├── .gitignore
 └── README.md
@@ -32,7 +37,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # 3. Run the app
-streamlit run app.py
+streamlit run app/app.py
+# ...or use the convenience script: run.bat (Windows CMD) / run.ps1 (PowerShell)
 ```
 
 The app opens at `http://localhost:8501` by default (configurable via `STREAMLIT_PORT`).
@@ -42,7 +48,7 @@ The app opens at `http://localhost:8501` by default (configurable via `STREAMLIT
 Copy `.env.example` to `.env` and adjust if needed:
 
 ```
-MODEL_PATH=xgb_complete_pipeline.pkl
+MODEL_PATH=models/xgb_complete_pipeline.pkl
 STREAMLIT_PORT=8501
 ```
 
